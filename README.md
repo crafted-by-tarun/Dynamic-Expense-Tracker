@@ -4,7 +4,7 @@
 
 **A modern, elegant personal finance tracker — live on GitHub Pages with zero setup.**
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_App-c9a84c?style=for-the-badge)](https://crafted-by-tarun.github.io/Expense-Tracker/)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_App-c9a84c?style=for-the-badge)](https://crafted-by-tarun.github.io/Dynamic-Expense-Tracker/)
 [![GitHub Pages](https://img.shields.io/badge/Hosted_on-GitHub_Pages-222?style=for-the-badge&logo=github)](https://pages.github.com/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 
@@ -44,30 +44,7 @@ No login required. Your data is stored locally in your browser.
 
 ---
 
-## 🖼️ Screenshots
 
-<table>
-  <tr>
-    <td align="center"><b>Dashboard</b></td>
-    <td align="center"><b>Add Transaction</b></td>
-  </tr>
-  <tr>
-    <td><img src="https://i.imgur.com/placeholder1.png" width="400"/></td>
-    <td><img src="https://i.imgur.com/placeholder2.png" width="400"/></td>
-  </tr>
-  <tr>
-    <td align="center"><b>Pie Chart</b></td>
-    <td align="center"><b>Bar Chart</b></td>
-  </tr>
-  <tr>
-    <td><img src="https://i.imgur.com/placeholder3.png" width="400"/></td>
-    <td><img src="https://i.imgur.com/placeholder4.png" width="400"/></td>
-  </tr>
-</table>
-
-> 💡 **Tip:** Replace the placeholder image URLs above with real screenshots from your live app!
-
----
 
 ## 🗂️ Project Structure
 
