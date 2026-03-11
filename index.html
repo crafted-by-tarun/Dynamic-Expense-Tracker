@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0d0d12;
+      --card:      #1a1a25;
+      --card2:     #202030;
+      --border:    #252535;
+      --gold:      #c9a84c;
+      --gold-dim:  #7a6230;
+      --green:     #4caf84;
+      --red:       #e05c5c;
+      --text:      #e8e8f0;
+      --muted:     #7a7a9a;
+      --dim:       #4a4a6a;
+      --serif:     'Playfair Display', Georgia, serif;
+      --sans:      'DM Sans', sans-serif;
+      --mono:      monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(ellipse 70% 40% at 15% 15%, rgba(201,168,76,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 85% 85%, rgba(76,175,132,0.05) 0%, transparent 60%);
+    }
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #303045; border-radius: 99px; }
+    select option { background: #1a1a25; }
+
+    /* ── HEADER ── */
+    .hdr {
+      position: sticky; top: 0; z-index: 99;
+      height: 62px; padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(20,20,28,0.9);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .hdr-brand { display:flex; align-items:center; gap:.7rem; }
+    .hdr-logo {
+      width:36px; height:36px; border-radius:10px;
+      background: linear-gradient(135deg,#c9a84c,#7a6230);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.1rem; font-weight:700; color:#1a1408;
+      box-shadow: 0 0 18px rgba(201,168,76,.35);
+    }
+    .hdr-title { font-family:var(--serif); font-size:1.15rem; font-weight:700; line-height:1; }
+    .hdr-sub   { font-size:.6rem; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; margin-top:3px; }
+    .hdr-date  { font-size:.72rem; color:var(--muted); font-family:var(--mono); }
+
+    /* ── LAYOUT ── */
+    .main  { max-width:980px; margin:0 auto; padding:1.4rem 1rem 5rem; }
+    .grid  { display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:1.4rem; align-items:start; }
+    .card  {
+      background: rgba(26,26,37,.88);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.4rem;
+      margin-bottom: 1.4rem;
+    }
+    .card-title { font-family:var(--serif); color:var(--gold); font-size:1.05rem; font-weight:700; margin-bottom:1.1rem; }
+
+    /* ── BALANCE ── */
+    .bal-lbl   { font-size:.65rem; text-transform:uppercase; letter-spacing:.16em; color:var(--muted); margin-bottom:.35rem; }
+    .bal-amt   { font-family:var(--serif); font-size:clamp(1.8rem,5vw,3rem); font-weight:700; letter-spacing:-.02em; margin-bottom:1.2rem; }
+    .bal-row   { display:flex; gap:.9rem; flex-wrap:wrap; }
+    .bal-tile  { flex:1 1 140px; display:flex; align-items:center; gap:.65rem; padding:.8rem; border-radius:12px; }
+    .bal-icon  { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.95rem; flex-shrink:0; }
+    .bal-tl    { font-size:.6rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+    .bal-tv    { font-family:var(--mono); font-weight:700; font-size:.95rem; }
+
+    /* ── FORM ── */
+    .form-hdr   { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.1rem; }
+    .form-hdr h3 { font-family:var(--serif); color:var(--gold); font-size:1.05rem; }
+    .btn-cancel {
+      background:none; border:1px solid var(--border); color:var(--muted);
+      border-radius:7px; padding:3px 12px; cursor:pointer; font-size:.73rem; font-family:var(--sans);
+      transition:.2s;
+    }
+    .btn-cancel:hover { border-color:var(--red); color:var(--red); }
+    .toggle     { display:flex; background:var(--bg); border-radius:12px; padding:4px; margin-bottom:1rem; border:1px solid var(--border); }
+    .tog-btn    { flex:1; padding:.52rem; border:none; border-radius:9px; font-weight:600; font-size:.83rem; cursor:pointer; font-family:var(--sans); transition:.2s; background:transparent; color:var(--muted); }
+    .tog-inc    { background:var(--green); color:#fff; box-shadow:0 2px 10px rgba(76,175,132,.35); }
+    .tog-exp    { background:var(--red);   color:#fff; box-shadow:0 2px 10px rgba(224,92,92,.35);  }
+    .field      { margin-bottom:.8rem; }
+    .inp, .sel  {
+      width:100%; padding:.68rem .9rem;
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:11px; color:var(--text); font-size:.88rem;
+      font-family:var(--sans); outline:none; appearance:none;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    .inp:focus,.sel:focus { border-color:#7a6230; box-shadow:0 0 0 3px rgba(201,168,76,.15); }
+    .inp.err { border-color:var(--red)!important; }
+    .inp::placeholder { color:var(--dim); }
+    .sel { cursor:pointer; }
+    .err-txt { color:var(--red); font-size:.7rem; margin-top:3px; margin-left:3px; }
+    .btn-add {
+      width:100%; padding:.85rem; border:none; border-radius:12px;
+      background:linear-gradient(135deg,#c9a84c,#7a6230);
+      color:#1a1408; font-weight:700; font-size:.92rem; font-family:var(--sans);
+      cursor:pointer; box-shadow:0 4px 20px rgba(201,168,76,.22);
+      transition:box-shadow .2s, transform .15s;
+    }
+    .btn-add:hover  { box-shadow:0 4px 30px rgba(201,168,76,.45); transform:translateY(-1px); }
+    .btn-add:active { transform:translateY(0); }
+
+    /* ── LIST ── */
+    .search {
+      width:100%; padding:.68rem .9rem; background:var(--bg);
+      border:1px solid var(--border); border-radius:11px;
+      color:var(--text); font-size:.88rem; font-family:var(--sans);
+      outline:none; margin-bottom:.7rem;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    .search:focus { border-color:#7a6230; box-shadow:0 0 0 3px rgba(201,168,76,.15); }
+    .search::placeholder { color:var(--dim); }
+    .pills  { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:.5rem; }
+    .pill   {
+      padding:3px 12px; border-radius:99px; border:1px solid var(--border);
+      background:transparent; color:var(--muted); font-size:.7rem;
+      font-family:var(--sans); cursor:pointer; transition:.18s; white-space:nowrap;
+    }
+    .tx-stack { display:flex; flex-direction:column; gap:5px; }
+    .empty    { text-align:center; padding:2.5rem 1rem; color:var(--muted); font-size:.83rem; }
+    .empty-ic { font-size:2.2rem; margin-bottom:.5rem; }
+    .list-cnt { font-size:.68rem; color:var(--dim); }
+
+    /* ── TX ITEM ── */
+    .txi {
+      display:flex; align-items:center; gap:.7rem;
+      padding:.8rem .9rem; border-radius:12px;
+      background:var(--card); border:1px solid transparent;
+      transition:background .18s, border-color .18s;
+      position:relative;
+    }
+    .txi:hover { background:var(--card2); border-color:var(--border); }
+    .txi-ico   { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .txi-info  { flex:1; min-width:0; }
+    .txi-desc  { font-weight:500; font-size:.88rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .txi-meta  { color:var(--muted); font-size:.68rem; margin-top:2px; display:flex; gap:.45rem; }
+    .txi-amt   { font-family:var(--mono); font-weight:700; font-size:.92rem; flex-shrink:0; }
+    .txi-acts  { display:flex; gap:3px; opacity:0; transition:opacity .18s; }
+    .txi:hover .txi-acts { opacity:1; }
+    .act {
+      width:28px; height:28px; border-radius:7px; border:none; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.75rem; transition:transform .13s;
+    }
+    .act:hover { transform:scale(1.15); }
+    .act-e { background:rgba(201,168,76,.15); color:var(--gold); }
+    .act-d { background:rgba(224,92,92,.12);  color:var(--red);  }
+
+    /* ── CHART ── */
+    .chart-tabs  { display:flex; gap:5px; }
+    .chart-tab   {
+      padding:4px 12px; border-radius:99px; border:1px solid var(--border);
+      background:transparent; color:var(--muted); font-size:.7rem;
+      font-family:var(--sans); cursor:pointer; transition:.18s;
+    }
+    .chart-tab.on { border-color:var(--gold); background:rgba(201,168,76,.1); color:var(--gold); font-weight:600; }
+    #chart-area   { width:100%; height:250px; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:480px) {
+      .hdr-date { display:none; }
+      .txi-acts { opacity:1; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- CDN scripts with fixed, reliable versions -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
+<script>
+// ── Aliases ─────────────────────────────────────────────────────────────────
+const h   = React.createElement;
+const {useState, useEffect, useCallback, useMemo} = React;
+
+
+// ── Data ─────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'exp_tracker_v3';
+
+const CATS = [
+  {id:'food',          em:'🍜', label:'Food & Dining',   color:'#e8864c', t:['expense']},
+  {id:'transport',     em:'🚗', label:'Transport',        color:'#4c8ee8', t:['expense']},
+  {id:'shopping',      em:'🛍️', label:'Shopping',         color:'#c84ce8', t:['expense']},
+  {id:'housing',       em:'🏠', label:'Housing',           color:'#4ce8c8', t:['expense']},
+  {id:'health',        em:'💊', label:'Health',            color:'#e84c7a', t:['expense']},
+  {id:'education',     em:'📚', label:'Education',         color:'#4ce868', t:['expense']},
+  {id:'travel',        em:'✈️', label:'Travel',            color:'#e8d44c', t:['expense']},
+  {id:'entertainment', em:'🎮', label:'Entertainment',     color:'#7a4ce8', t:['expense']},
+  {id:'salary',        em:'💼', label:'Salary',            color:'#4caf84', t:['income'] },
+  {id:'freelance',     em:'💻', label:'Freelance',         color:'#84af4c', t:['income'] },
+  {id:'investment',    em:'📈', label:'Investment',        color:'#af844c', t:['income'] },
+  {id:'other',         em:'📦', label:'Other',             color:'#888899', t:['income','expense']},
+];
+
+const getCat   = id  => CATS.find(c=>c.id===id) || CATS[CATS.length-1];
+const catsFor  = type => CATS.filter(c=>c.t.includes(type));
+const fmt      = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(Math.abs(n));
+const fmtDate  = iso => new Date(iso).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+const genId    = () => crypto?.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(36).slice(2);
+
+// ── State hook ───────────────────────────────────────────────────────────────
+function useTransactions() {
+  const [txns, setTxns] = useState(() => {
+    try { const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):[]; } catch{return [];}
+  });
+  const [editing, setEditing] = useState(null);
+
+  useEffect(()=>{
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(txns));}catch{}
+  },[txns]);
+
+  const add    = useCallback(f  => setTxns(p=>[{...f,id:genId(),date:new Date().toISOString()},...p]),[]);
+  const update = useCallback(u  => {setTxns(p=>p.map(t=>t.id===u.id?{...t,...u}:t));setEditing(null);},[]);
+  const remove = useCallback(id => {setTxns(p=>p.filter(t=>t.id!==id));setEditing(p=>p?.id===id?null:p);},[]);
+  return {txns,editing,add,update,remove,startEdit:setEditing,cancelEdit:()=>setEditing(null)};
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+function Header() {
+  const d = new Date().toLocaleDateString('en-IN',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  return h('header',{className:'hdr'},
+    h('div',{className:'hdr-brand'},
+      h('div',{className:'hdr-logo'},'₹'),
+      h('div',null,
+        h('div',{className:'hdr-title'},'Expense Tracker'),
+        h('div',{className:'hdr-sub'},'Financial Overview')
+      )
+    ),
+    h('div',{className:'hdr-date'},d)
+  );
+}
+
+// ── Balance ──────────────────────────────────────────────────────────────────
+function Balance({txns}) {
+  const income  = useMemo(()=>txns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0),[txns]);
+  const expense = useMemo(()=>txns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0),[txns]);
+  const bal     = income - expense;
+  const pos     = bal >= 0;
+
+  return h('div',{className:'card'},
+    h('p',{className:'bal-lbl'},'Total Balance'),
+    h('p',{className:'bal-amt',style:{color:pos?'#4caf84':'#e05c5c'}}, (pos?'':'-')+fmt(bal)),
+    h('div',{className:'bal-row'},
+      h('div',{className:'bal-tile',style:{background:'rgba(76,175,132,.12)',border:'1px solid rgba(76,175,132,.25)'}},
+        h('div',{className:'bal-icon',style:{background:'rgba(76,175,132,.2)',color:'#4caf84'}},'↑'),
+        h('div',null, h('div',{className:'bal-tl'},'Income'), h('div',{className:'bal-tv',style:{color:'#4caf84'}},fmt(income)))
+      ),
+      h('div',{className:'bal-tile',style:{background:'rgba(224,92,92,.12)',border:'1px solid rgba(224,92,92,.25)'}},
+        h('div',{className:'bal-icon',style:{background:'rgba(224,92,92,.2)',color:'#e05c5c'}},'↓'),
+        h('div',null, h('div',{className:'bal-tl'},'Expenses'), h('div',{className:'bal-tv',style:{color:'#e05c5c'}},fmt(expense)))
+      )
+    )
+  );
+}
+
+// ── AddTransaction ────────────────────────────────────────────────────────────
+const BLANK = {description:'',amount:'',type:'expense',category:'other'};
+
+function AddTransaction({onAdd,editing,onUpdate,onCancel}) {
+  const [form,setForm]     = useState(BLANK);
+  const [errors,setErrors] = useState({});
+
+  useEffect(()=>{
+    if(editing){setForm({description:editing.description,amount:String(editing.amount),type:editing.type,category:editing.category});setErrors({});}
+    else setForm(BLANK);
+  },[editing]);
+
+  const set = (k,v) => setForm(f=>({...f,[k]:v}));
+
+  const changeType = type => {
+    const first = catsFor(type)[0]?.id||'other';
+    setForm(f=>({...f,type,category:first}));
+  };
+
+  const submit = () => {
+    const e={};
+    if(!form.description.trim()) e.description='Description is required';
+    if(!form.amount||isNaN(form.amount)||Number(form.amount)<=0) e.amount='Enter a valid positive amount';
+    if(Object.keys(e).length){setErrors(e);return;}
+    setErrors({});
+    const p={description:form.description.trim(),amount:parseFloat(form.amount),type:form.type,category:form.category};
+    if(editing){onUpdate({...editing,...p});}else{onAdd(p);setForm(BLANK);}
+  };
+
+  const cats = catsFor(form.type);
+
+  return h('div',{className:'card'},
+    h('div',{className:'form-hdr'},
+      h('h3',null, editing?'✏️ Edit Transaction':'＋ New Transaction'),
+      editing && h('button',{className:'btn-cancel',onClick:onCancel},'Cancel')
+    ),
+    // Type toggle
+    h('div',{className:'toggle'},
+      ['expense','income'].map(t=>
+        h('button',{
+          key:t,
+          className:'tog-btn '+(form.type===t?('expense'===t?'tog-exp':'tog-inc'):''),
+          onClick:()=>changeType(t)
+        }, t==='income'?'↑ Income':'↓ Expense')
+      )
+    ),
+    // Description
+    h('div',{className:'field'},
+      h('input',{className:'inp'+(errors.description?' err':''),type:'text',value:form.description,
+        placeholder:'Description (e.g. Groceries, Salary)',
+        onChange:e=>set('description',e.target.value),
+        onKeyDown:e=>e.key==='Enter'&&submit()}),
+      errors.description && h('p',{className:'err-txt'},errors.description)
+    ),
+    // Amount
+    h('div',{className:'field'},
+      h('input',{className:'inp'+(errors.amount?' err':''),type:'number',min:'0',step:'0.01',value:form.amount,
+        placeholder:'Amount (₹)',
+        onChange:e=>set('amount',e.target.value),
+        onKeyDown:e=>e.key==='Enter'&&submit()}),
+      errors.amount && h('p',{className:'err-txt'},errors.amount)
+    ),
+    // Category
+    h('div',{className:'field'},
+      h('select',{className:'sel',value:form.category,onChange:e=>set('category',e.target.value)},
+        cats.map(c=>h('option',{key:c.id,value:c.id},c.em+' '+c.label))
+      )
+    ),
+    h('button',{className:'btn-add',onClick:submit}, editing?'Update Transaction':'Add Transaction')
+  );
+}
+
+// ── TransactionItem ───────────────────────────────────────────────────────────
+function TxItem({tx,onDelete,onEdit}) {
+  const cat = getCat(tx.category);
+  const inc = tx.type==='income';
+  return h('div',{className:'txi'},
+    h('div',{className:'txi-ico',style:{background:cat.color+'22',border:`1px solid ${cat.color}44`}},cat.em),
+    h('div',{className:'txi-info'},
+      h('p',{className:'txi-desc'},tx.description),
+      h('p',{className:'txi-meta'},
+        h('span',null,cat.label),
+        h('span',null,'·'),
+        h('span',null,fmtDate(tx.date))
+      )
+    ),
+    h('span',{className:'txi-amt',style:{color:inc?'#4caf84':'#e05c5c'}}, (inc?'+':'−')+fmt(tx.amount)),
+    h('div',{className:'txi-acts'},
+      h('button',{className:'act act-e',onClick:()=>onEdit(tx),title:'Edit'},'✏'),
+      h('button',{className:'act act-d',onClick:()=>onDelete(tx.id),title:'Delete'},'✕')
+    )
+  );
+}
+
+// ── TransactionList ───────────────────────────────────────────────────────────
+function TxList({txns,onDelete,onEdit}) {
+  const [search,setSearch]   = useState('');
+  const [typeF,setTypeF]     = useState('all');
+  const [catF,setCatF]       = useState('all');
+
+  const usedCats = useMemo(()=>{
+    const ids=[...new Set(txns.map(t=>t.category))];
+    return CATS.filter(c=>ids.includes(c.id));
+  },[txns]);
+
+  const filtered = useMemo(()=>{
+    const q=search.toLowerCase();
+    return txns.filter(tx=>
+      (typeF==='all'||tx.type===typeF)&&
+      (catF==='all'||tx.category===catF)&&
+      tx.description.toLowerCase().includes(q)
+    );
+  },[txns,typeF,catF,search]);
+
+  const Pill = ({active,color,onClick,label}) =>
+    h('button',{
+      className:'pill',
+      style:active?{borderColor:color,color,background:color+'1a',fontWeight:600}:{},
+      onClick
+    },label);
+
+  return h('div',{className:'card'},
+    h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem'}},
+      h('h3',{className:'card-title',style:{marginBottom:0}},'Transaction History'),
+      h('span',{className:'list-cnt'},filtered.length+'/'+txns.length)
+    ),
+    h('input',{className:'search',type:'search',value:search,placeholder:'🔍  Search transactions…',onChange:e=>setSearch(e.target.value)}),
+    // Type pills
+    h('div',{className:'pills'},
+      [{v:'all',l:'All Types',c:'#c9a84c'},{v:'income',l:'↑ Income',c:'#4caf84'},{v:'expense',l:'↓ Expenses',c:'#e05c5c'}]
+        .map(({v,l,c})=>h(Pill,{key:v,active:typeF===v,color:c,onClick:()=>setTypeF(v),label:l}))
+    ),
+    // Category pills
+    usedCats.length>0 && h('div',{className:'pills',style:{marginBottom:'.8rem'}},
+      h(Pill,{active:catF==='all',color:'#7a7a9a',onClick:()=>setCatF('all'),label:'All Categories'}),
+      ...usedCats.map(c=>h(Pill,{key:c.id,active:catF===c.id,color:c.color,onClick:()=>setCatF(c.id),label:c.em+' '+c.label}))
+    ),
+    // List
+    h('div',{className:'tx-stack'},
+      filtered.length===0
+        ? h('div',{className:'empty'},h('div',{className:'empty-ic'},'🪙'),txns.length===0?'No transactions yet. Add one above!':'No matches found.')
+        : filtered.map(tx=>h(TxItem,{key:tx.id,tx,onDelete,onEdit}))
+    )
+  );
+}
+
+// ── PieChart (pure Canvas) ────────────────────────────────────────────────────
+function PieCanvas({data}) {
+  const ref = React.useRef();
+  useEffect(()=>{
+    const canvas = ref.current;
+    if(!canvas||!data.length) return;
+    const W=canvas.width, H=canvas.height;
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H/2, outerR=Math.min(W,H)/2-10, innerR=outerR*0.52;
+    const total=data.reduce((s,d)=>s+d.value,0);
+    let angle=-Math.PI/2;
+    data.forEach(d=>{
+      const slice=(d.value/total)*Math.PI*2;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,outerR,angle,angle+slice);
+      ctx.closePath();
+      ctx.fillStyle=d.color;
+      ctx.fill();
+      angle+=slice;
+    });
+    // Donut hole
+    ctx.beginPath();
+    ctx.arc(cx,cy,innerR,0,Math.PI*2);
+    ctx.fillStyle='#0d0d12';
+    ctx.fill();
+    // Center label
+    ctx.fillStyle='#e8e8f0';
+    ctx.font='bold 13px DM Sans,sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText('Expenses',cx,cy);
+  },[data]);
+
+  return h('canvas',{ref,width:220,height:220,style:{display:'block',margin:'0 auto'}});
+}
+
+// ── BarChart (pure Canvas) ────────────────────────────────────────────────────
+function BarCanvas({data}) {
+  const ref = React.useRef();
+  useEffect(()=>{
+    const canvas = ref.current;
+    if(!canvas||!data.length) return;
+    const W=canvas.width, H=canvas.height;
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+    const pad={top:16,right:16,bottom:40,left:52};
+    const chartW=W-pad.left-pad.right;
+    const chartH=H-pad.top-pad.bottom;
+    const maxVal=Math.max(...data.map(d=>Math.max(d.income,d.expense)),1);
+    const groups=data.length;
+    const groupW=chartW/groups;
+    const barW=Math.min(groupW*0.3,22);
+    const gap=4;
+
+    // Grid lines
+    ctx.strokeStyle='#252535';
+    ctx.lineWidth=1;
+    [0,0.25,0.5,0.75,1].forEach(f=>{
+      const y=pad.top+chartH*(1-f);
+      ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+chartW,y); ctx.stroke();
+      const val=maxVal*f;
+      ctx.fillStyle='#7a7a9a';
+      ctx.font='10px monospace';
+      ctx.textAlign='right';
+      ctx.fillText(val>=1000?(val/1000).toFixed(0)+'k':Math.round(val), pad.left-6, y+4);
+    });
+
+    // Bars
+    data.forEach((d,i)=>{
+      const gx=pad.left+i*groupW+groupW/2;
+      // Income bar
+      const ih=(d.income/maxVal)*chartH;
+      ctx.fillStyle='#4caf84';
+      ctx.beginPath();
+      const ix=gx-barW-gap/2;
+      const iy=pad.top+chartH-ih;
+      roundRect(ctx,ix,iy,barW,ih,4);
+      ctx.fill();
+      // Expense bar
+      const eh=(d.expense/maxVal)*chartH;
+      ctx.fillStyle='#e05c5c';
+      ctx.beginPath();
+      const ex=gx+gap/2;
+      const ey=pad.top+chartH-eh;
+      roundRect(ctx,ex,ey,barW,eh,4);
+      ctx.fill();
+      // Month label
+      ctx.fillStyle='#7a7a9a';
+      ctx.font='10px DM Sans,sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(d.month, gx, pad.top+chartH+16);
+    });
+
+    // Legend
+    [['#4caf84','Income'],['#e05c5c','Expense']].forEach(([c,l],i)=>{
+      const lx=pad.left+chartW/2+(i-0.5)*80;
+      ctx.fillStyle=c;
+      ctx.beginPath(); ctx.arc(lx,pad.top+chartH+32,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#7a7a9a';
+      ctx.font='10px DM Sans,sans-serif';
+      ctx.textAlign='left';
+      ctx.fillText(l,lx+9,pad.top+chartH+36);
+    });
+  },[data]);
+
+  return h('canvas',{ref,width:460,height:240,style:{display:'block',width:'100%',height:'auto'}});
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  if(h<=0){return;}
+  r=Math.min(r,h/2,w/2);
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h);
+  ctx.lineTo(x,y+h);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+// ── Chart wrapper ─────────────────────────────────────────────────────────────
+function Chart({txns}) {
+  const [view,setView] = useState('pie');
+
+  const pieData = useMemo(()=>{
+    const m={};
+    txns.filter(t=>t.type==='expense').forEach(t=>{
+      const c=getCat(t.category);
+      if(!m[t.category])m[t.category]={name:c.em+' '+c.label,value:0,color:c.color};
+      m[t.category].value+=t.amount;
+    });
+    return Object.values(m).sort((a,b)=>b.value-a.value);
+  },[txns]);
+
+  const barData = useMemo(()=>{
+    const m={};
+    txns.forEach(t=>{
+      const k=new Date(t.date).toLocaleDateString('en-IN',{month:'short',year:'2-digit'});
+      if(!m[k])m[k]={month:k,income:0,expense:0};
+      m[k][t.type]+=t.amount;
+    });
+    return Object.values(m).slice(-6);
+  },[txns]);
+
+  return h('div',{className:'card'},
+    h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.1rem'}},
+      h('h3',{className:'card-title',style:{marginBottom:0}},'Analytics'),
+      h('div',{className:'chart-tabs'},
+        [{id:'pie',l:'🥧 Breakdown'},{id:'bar',l:'📊 Monthly'}].map(({id,l})=>
+          h('button',{key:id,className:'chart-tab'+(view===id?' on':''),onClick:()=>setView(id)},l)
+        )
+      )
+    ),
+    txns.length===0
+      ? h('div',{className:'empty'},h('div',{className:'empty-ic'},'📊'),'Add transactions to see analytics')
+      : view==='pie'
+        ? pieData.length===0
+          ? h('div',{className:'empty'},'No expense data yet')
+          : h('div',null,
+              h(PieCanvas,{data:pieData}),
+              // Legend
+              h('div',{style:{display:'flex',flexWrap:'wrap',gap:'6px 14px',marginTop:'1rem',justifyContent:'center'}},
+                pieData.map((d,i)=>
+                  h('div',{key:i,style:{display:'flex',alignItems:'center',gap:5}},
+                    h('span',{style:{width:9,height:9,borderRadius:'50%',background:d.color,display:'inline-block'}}),
+                    h('span',{style:{fontSize:'.7rem',color:'#7a7a9a'}},d.name)
+                  )
+                )
+              )
+            )
+        : barData.length===0
+          ? h('div',{className:'empty'},'No monthly data yet')
+          : h(BarCanvas,{data:barData})
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+function App() {
+  const {txns,editing,add,update,remove,startEdit,cancelEdit} = useTransactions();
+  return h('div',null,
+    h(Header,null),
+    h('main',{className:'main'},
+      h('div',{className:'grid'},
+        h('section',null,
+          h(Balance,{txns}),
+          h(AddTransaction,{onAdd:add,editing,onUpdate:update,onCancel:cancelEdit}),
+          h(Chart,{txns})
+        ),
+        h('section',null,
+          h(TxList,{txns,onDelete:remove,onEdit:startEdit})
+        )
+      )
+    )
+  );
+}
+
+// ── Mount ─────────────────────────────────────────────────────────────────────
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.StrictMode,null,h(App,null)));
+</script>
+</body>
+</html>
