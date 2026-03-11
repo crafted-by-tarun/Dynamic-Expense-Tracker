@@ -7,11 +7,11 @@
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_App-c9a84c?style=for-the-badge)](https://crafted-by-tarun.github.io/Expense-Tracker/)
 [![GitHub Pages](https://img.shields.io/badge/Hosted_on-GitHub_Pages-222?style=for-the-badge&logo=github)](https://pages.github.com/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![No Build](https://img.shields.io/badge/No_Build_Step-✓-4caf84?style=for-the-badge)]()
+
 
 ---
 
-![Expense Tracker Screenshot](https://i.imgur.com/placeholder.png)
+
 
 *Track your income and expenses beautifully — with real-time charts, categories, and local persistence.*
 
@@ -38,7 +38,7 @@
 
 ## 🚀 Live Demo
 
-👉 **[crafted-by-tarun.github.io/Expense-Tracker](https://crafted-by-tarun.github.io/Expense-Tracker/)**
+👉 **[crafted-by-tarun.github.io/Expense-Tracker](https://crafted-by-tarun.github.io/Dynamic-Expense-Tracker/)**
 
 No login required. Your data is stored locally in your browser.
 
